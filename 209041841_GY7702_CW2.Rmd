@@ -9,7 +9,13 @@ output: pdf_document
 # Datascience-Project
 ##_The University of Leicester_
 **Coursework 2**
+**This document is created from R - Markdown and linked to the GitHub repository**
 [The link to the GitHub Repository](https://github.com/gowthamnallathambi/Datascience_project.git)
+
+Repository link : https://github.com/gowthamnallathambi/Datascience_project.git
+
+This repository / document contains public sector information licensed under the Open Government Licence v3.0 (http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/): [list the files here]. See also [add relevant links to sources of data, see assignment document] and Office for National Statistics (https://geoportal.statistics.gov.uk/).
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -1324,3 +1330,31 @@ Household_model %>%
   plot(which = c(5))
 
 ```
+# Results and Discussion
+
+  In order to find the relationship between dependent and independent variables, regression analysis is a statistical process. Multiple linear regression, which is a supervised machine learning technique, was used in this exercise to construct a model that predicts the value of the outcome variable k031 (house holding owned or shared ownership of property) based on the other variables used in question A.1 of the exploratory study. As follows, the simple multiple linear regression equation can be seen: 
+  
+
+This project the household model will 
+
+property ownershipi = (model) + errori
+
+property ownershipi - Outcome variable
+
+All the remaining variables with different variable statistical units are used to construct a robust model for the existence of households that own or have shared land.
+k004 – Persons aged 45 to 64 per Output Area (OA). Persons is the statistical unit for this variable. Since OAs differ in size and composition, the % of people aged 45 to 64 per OA can be estimated using the Total_Population, which is more stable as it normalizes the data.
+k009 – Persons aged over 16 who are all single per OA. Person_16_Over is the statistical unit for this variable. Since OAs differ in size and composition, the % per OA can be estimated using the Total_Population_16_ and_Over.
+k010 – Persons aged over 16 who are all married or in a registered same-sex civil relationship. Person_16_Over is the statistical unit for this variable. Since OAs differ in size and composition, the % per OA can be estimated using the Total_Population_16_ and_Over.
+k027 – Households who live in individual house bungalow and house. Household_Spaces is the statistical unit for this variable. Since OA's differ in size and composition, the % of households per OA can be estimated using the Total_Household_Spaces.
+k041 – Households count with 2 or more vans or cars per OA. Household is the statistical unit for this variable. Since OA's differ in size and composition, the % of households per OA with 2 or more vans or cars can be estimated using the Total_Household.
+k046 – Employed persons aged between 16 and 74 works part-time. Employment_16_to_74 is the statistical unit for this variable. Since OA's differ in size and composition, the % of households per OA can be estimated using the Total_Employment_16_to_74.
+
+The hypothesis for multiple regression analysis is – 
+1.Normality – To check the normality of standard residuals, the Shapiro-Wilk test is used. For the model to be stable, the test should not be relevant.
+2.Homoscedacity – To check the homoscedasticity of standard residuals, the Breusch-Pagan test is used. For the model to be stable, the test should not be relevant.
+3.Independence – To check the independence of residuals, the Durbin-Watson test is used.
+4.Multicollinearity – The Variance Inflation Factor (VIF) test is performed where there might be non-multicollinearity if the largest VIF value is greater than 10 or the average VIF is greater than 1.
+
+The model output produced for the variable k031 indicates that the model is not fit, indicating the percent of households owning or having joint ownership of property can account for the model based on the different variable Individual count, household and jobs. However, the model is not stable. The residuals are not normally distributed, but the residuals do not fulfill the assumption of homoscedasticity (Breusch-Pagan test, BP = 32.155, p<0.001), nor the assumption of independence (Durbin-Watson test, DW = 1.7526, p<0.01).
+
+The residuals are also visually analysed by plotting different plots such as the Residuals Vs Fitted and the scale-location plot provides an insight into the residuals' homoscedasticity, the standard Q-Q plot provides an example of the residuals' normality, and the Vs leverage residuals can be useful to distinguish unusual cases.
