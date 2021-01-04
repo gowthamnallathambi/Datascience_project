@@ -1,0 +1,1326 @@
+---
+title: "209041841_GY7702_CW2"
+author: '209041841'
+date: "04/01/2021"
+output: pdf_document
+---
+
+# GY7702-R-for-Data-Science
+# Datascience-Project
+##_The University of Leicester_
+**Coursework 2**
+[The link to the GitHub Repository](https://github.com/gowthamnallathambi/Datascience_project.git)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Option A
+# Option A.1
+
+## Exploratory Data Analysis
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+rm(list=ls())       # To clear environment
+library(tidyverse)
+library(knitr)
+library(pastecs)
+library(magrittr)
+```
+
+
+```{r read_data, warning = FALSE, message = FALSE}
+# Read OAC_2011 data
+OAC_2011 <-
+  readr::read_csv("Data/2011_OAC_Raw_kVariables.csv")
+```
+
+
+```{r Wolverhampton_LAD, warning = FALSE, message = FALSE}
+
+# Creating new table for assigned LAD - Wolverhampton 
+
+Wolverhampton_LAD <-
+  readr::read_csv("Data/OA11_LSOA11_MSOA11_LAD11_EW_LUv2.csv") %>% 
+  dplyr::filter(LAD11CD == "E08000031") %>%
+  dplyr::select(-LAD11NMW) %>%
+  readr::write_csv("Data/Wolverhampton_LAD.csv")
+```
+
+
+```{r read_LAD, warning = FALSE, message = FALSE}
+
+# Read_LAD data
+
+Wolverhampton_LAD <-
+  readr::read_csv("Data/Wolverhampton_LAD.csv")
+
+```
+
+
+```{r innerjoin, warning = FALSE, message = FALSE}
+# Tibble joining 
+
+OAC_2011 %>%
+  
+dplyr::inner_join(
+
+  Wolverhampton_LAD,
+  by = c("OA" = "OA11CD")
+) %>%
+  dplyr::select(OA, Total_Population, Total_Households, Total_Dwellings,
+                Total_Household_Spaces, Total_Population_16_and_over,
+                Total_Population_16_to_74, Total_Employment_16_to_74, 
+                Total_Pop_in_Housesholds_16_and_over, 
+                k004, k009, k010, k027, k031, k041, k046
+  ) %>%
+  readr::write_csv("Data/Wolverhampton_OAC2011.csv")
+
+```
+
+
+```{r read_wolverhampton_data, warning = FALSE, message = FALSE}
+# Read_Wolverhampton_data
+
+Wolverhampton_2011OAC <-
+  readr::read_csv("Data/Wolverhampton_OAC2011.csv")
+```
+
+## Data Visualisation
+## Distribution of variables
+
+### k004 - Persons aged 45 to 64
+
+```{r k004-summary, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+summary(Wolverhampton_2011OAC$k004)
+
+```
+
+
+```{r K004_Histogram,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k004
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#e41a1c", colour="black") +
+  ggplot2::ggtitle("k004 : Persons aged 45 to 64") +
+  ggplot2::xlab("Population of Age") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r K004_Scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot 
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Population,
+      y = k004
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#e41a1c") +
+  ggplot2::ggtitle("Wolverhampton persons aged 45 to 64") +
+  ggplot2::xlab("Total number of population") +
+  ggplot2::ylab("Persons aged 45 to 64") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r K004_maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton person aged 45 to 64
+
+k004_max <- 
+Wolverhampton_2011OAC %>%
+dplyr::filter(k004>20) %>%
+  dplyr::select(OA, k004) %>%
+  dplyr::slice_max(k004, n=20)
+
+ggplot2::ggplot(k004_max,
+       aes(
+         x = k004,
+         y = OA,
+         )
+       )+
+ggplot2::geom_bar(position = "stack", stat = "identity", fill="#e41a1c", colour="black") +
+ggplot2::ggtitle("Top 20 regions of Wolverhampton person aged 45 to 64")+
+ggplot2::xlab("Population age")+
+ggplot2::ylab("Output Area (OA)")+
+ggplot2::theme_bw() 
+
+```
+
+
+```{r k004_minimum, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton person aged 45 to 64
+
+k004_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::filter(k004>20) %>%
+  dplyr::select(OA, k004) %>%
+  dplyr::slice_min(k004, n=20)
+
+ggplot2::ggplot(k004_min,
+                aes(
+                  x = k004,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#e41a1c", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton person aged 45 to 64")+
+  ggplot2::xlab("Population age")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+### k009-Persons aged over 16 who are single
+
+```{r k009-summary, warning = FALSE, message = FALSE}
+
+summary(Wolverhampton_2011OAC$k009)
+
+```
+
+
+```{r k009-Histogram,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k009
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#f781bf", colour="black") +
+  ggplot2::ggtitle("k009 : Persons aged over 16 who are single") +
+  ggplot2::xlab("Marital_and_Civil_Partnership_Status") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k009-Scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Population_16_and_over,
+      y = k009
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#f781bf") +
+  ggplot2::ggtitle("Wolverhampton populations Marital and Civil Partnership Status") +
+  ggplot2::xlab("Total population aged 16 and over") +
+  ggplot2::ylab("Persons aged over 16 who are single") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k009-Maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton Marital_and_Civil_Partnership_Status
+
+k009_max <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k009) %>%
+  dplyr::slice_max(k009, n=20)
+
+ggplot2::ggplot(k009_max,
+                aes(
+                  x = k009,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#f781bf", colour="black") +
+  ggplot2::ggtitle("Top 20 regions of Wolverhampton Marital_and_Civil_Partnership_Status")+
+  ggplot2::xlab("Persons aged over 16 who are single")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k009-Minimum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton Marital_and_Civil_Partnership_Status
+
+k009_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k009) %>%
+  dplyr::slice_min(k009, n=20)
+
+ggplot2::ggplot(k009_min,
+                aes(
+                  x = k009,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#f781bf", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton Marital_and_Civil_Partnership_Status")+
+  ggplot2::xlab("Persons aged over 16 who are single")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+### k010 - Persons aged over 16 who are married or in a registered same-sex civil partnership
+
+```{r k010-summary,warning = FALSE, message = FALSE}
+
+summary(Wolverhampton_2011OAC$k010)
+
+```
+
+
+```{r k010-Histogram,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k010
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#ff7f00", colour="black") +
+  ggplot2::ggtitle("k010 : Persons aged over 16 who are married or in a registered same-sex civil partnership") +
+  ggplot2::xlab("Marital_and_Civil_Partnership_Status") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k010-Scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Population_16_and_over,
+      y = k010
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#ff7f00") +
+  ggplot2::ggtitle("Wolverhampton Marital and Civil Partnership Status") +
+  ggplot2::xlab("Total populatoin aged 16 and over") +
+  ggplot2::ylab("Persons aged over 16 who are married or in a registered same-sex civil partnership") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k010-Maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton Marital and Civil Partnership Status
+
+k010_max <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k010) %>%
+  dplyr::filter(k010>20) %>%
+  dplyr::slice_max(k010, n=20)
+
+ggplot2::ggplot(k010_max,
+                aes(
+                  x = k010,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#ff7f00", colour="black") +
+  ggplot2::ggtitle("Top 20 regions of Wolverhampton Marital and Civil Partnership Status")+
+  ggplot2::xlab("Persons aged over 16 who are married or in a registered same-sex civil partnership")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k010-Minimum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton Marital_and_Civil_Partnership_Status
+
+k010_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::filter(k010>20) %>%
+  dplyr::select(OA, k010) %>%
+  dplyr::slice_min(k010, n=20)
+
+ggplot2::ggplot(k010_min,
+                aes(
+                  x = k010,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#ff7f00", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton Marital_and_Civil_Partnership_Status")+
+  ggplot2::xlab("Persons aged over 16 who are married or in a registered same-sex civil partnership")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw()
+
+```
+
+### k027-Households who live in a detached house or bungalow
+
+```{r k027-summary,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+summary(Wolverhampton_2011OAC$k027)
+
+```
+
+
+```{r k027-histogram,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k027
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#a65628", colour="black") +
+  ggplot2::ggtitle("k027 : Households who live in a detached house or bungalow") +
+  ggplot2::xlab("Housing Type") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k027-scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Household_Spaces,
+      y = k027
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#a65628") +
+  ggplot2::ggtitle("Households who live in a detached house or bungalow in Wolverhampton") +
+  ggplot2::xlab("Total dwelling types") +
+  ggplot2::ylab("Housing types") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k027-maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton Housing types
+
+k027_max <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k027) %>%
+  dplyr::slice_max(k027, n=20)
+
+ggplot2::ggplot(k027_max,
+                aes(
+                  x = k027,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#a65628", colour="black") +
+  ggplot2::ggtitle("Top 20 regions of Wolverhampton Housing types")+
+  ggplot2::xlab("Households who live in a detached house or bungalow")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k027-minimum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton Housing types
+
+k027_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k027) %>%
+  dplyr::filter(k027>20) %>%
+  dplyr::slice_min(k027, n=20)
+
+ggplot2::ggplot(k027_min,
+                aes(
+                  x = k027,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#a65628", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton Housing types")+
+  ggplot2::xlab("Households who live in a detached house or bungalow")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+### k031-Households who own or have shared ownership of property
+
+```{r k031-summary,warning = FALSE, message = FALSE}
+
+summary(Wolverhampton_2011OAC$k031)
+
+```
+
+
+```{r k031-histogram, echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k031
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#984ea3", colour="black") +
+  ggplot2::ggtitle("k027 : Households who own or have shared ownership of property") +
+  ggplot2::xlab("Housing Ownership") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k031-scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Households,
+      y = k031
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#984ea3") +
+  ggplot2::ggtitle("Households who own or have shared ownership of property in Wolverhampton") +
+  ggplot2::xlab("Total dwelling types") +
+  ggplot2::ylab("Housing_Ownership") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k031-maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton Housing ownership
+
+k031_max <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k031) %>%
+  dplyr::filter(k031>20) %>%
+  dplyr::slice_max(k031, n=20)
+
+ggplot2::ggplot(k031_max,
+                aes(
+                  x = k031,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#984ea3", colour="black") +
+  ggplot2::ggtitle("Top 20 regions of Wolverhampton Housing ownership")+
+  ggplot2::xlab("Households who own or have shared ownership of property")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k031-Minimum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton Housing types
+
+k031_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k031) %>%
+  dplyr::filter(k031>20) %>%
+  dplyr::slice_min(k031, n=20)
+
+ggplot2::ggplot(k031_min,
+                aes(
+                  x = k031,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#984ea3", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton Housing types")+
+  ggplot2::xlab("Households who live in a detached house or bungalow")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+### k041-Households with two or more cars or vans
+
+```{r k041-summary, message=FALSE, warning=FALSE}
+
+summary(Wolverhampton_2011OAC$k041)
+
+```
+
+
+```{r k041-histogram,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k041
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#377eb8", colour="black") +
+  ggplot2::ggtitle("k041 : Households with two or more cars or vans") +
+  ggplot2::xlab("Households Vehicle Availability") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r k041-scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Households,
+      y = k041
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#377eb8") +
+  ggplot2::ggtitle("Households with two or more cars or vans in Wolverhampton") +
+  ggplot2::xlab("Total Household Spaces") +
+  ggplot2::ylab("Vehcile Availability in households") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k041-Maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton vehicle availability
+
+k041_max <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k041) %>%
+  dplyr::filter(k041>20) %>%
+  dplyr::slice_max(k041, n=20)
+
+ggplot2::ggplot(k041_max,
+                aes(
+                  x = k041,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#377eb8", colour="black") +
+  ggplot2::ggtitle("Top 20 regions of Wolverhampton vehicle availability")+
+  ggplot2::xlab("Households with two or more cars or vans")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k041-Minimum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton vehicle availability
+
+k041_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k041) %>%
+  dplyr::filter(k041>20) %>%
+  dplyr::slice_min(k041, n=20)
+
+ggplot2::ggplot(k041_min,
+                aes(
+                  x = k041,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#377eb8", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton vehicle availability")+
+  ggplot2::xlab("Households with two or more cars or vans")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw()
+
+```
+
+### k046-Employed persons aged between 16 and 74 who work part-time
+
+```{r k046-summary,warning = FALSE, message = FALSE}
+
+summary(Wolverhampton_2011OAC$k046)
+
+```
+
+
+```{r k046-Histogram,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Histogram
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot (
+    aes(
+      x = k046
+    )
+  ) +
+  ggplot2::geom_histogram(binwidth = 5, fill="#ffff33", colour="black") +
+  ggplot2::ggtitle("k046:Employed persons aged between 16 and 74 who work part-time") +
+  ggplot2::xlab("Employment_16_to_74 works in part-time") +
+  ggplot2::ylab("Count") +
+  ggplot2::theme_bw()
+
+```
+
+
+```{r, k046-scatterplot,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Scatterplot
+
+Wolverhampton_2011OAC %>%
+  ggplot2::ggplot(
+    aes(
+      x = Total_Household_Spaces,
+      y = k046
+    )
+  )+
+  ggplot2::geom_point(color= "black", shape = 23, size = 1, fill = "#ffff33") +
+  ggplot2::ggtitle("Employed persons aged between 16 and 74 who work part-time") +
+  ggplot2::xlab("Total Persons Employed aged 16 to 74") +
+  ggplot2::ylab("Employment Hours who works part-time") +
+  ggplot2::scale_y_log10() +
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r k046-maximum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Top 20 regions of Wolverhampton Employed persons who work part-time
+
+k046_max <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k046) %>%
+  dplyr::slice_max(k046, n=20)
+
+ggplot2::ggplot(k046_max,
+                aes(
+                  x = k046,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#ffff33", colour="black") +
+  ggplot2::ggtitle("Top 20 regions of Wolverhampton Employed persons who work part-time")+
+  ggplot2::xlab("Employed persons aged between 16 and 74")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+
+```{r, k046-minimum,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Bottom 20 regions of Wolverhampton Employed persons who work part-time
+
+k046_min <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::select(OA, k046) %>%
+  dplyr::slice_min(k046, n=20)
+
+ggplot2::ggplot(k046_min,
+                aes(
+                  x = k046,
+                  y = OA,
+                )
+)+
+  ggplot2::geom_bar(position = "stack", stat = "identity", fill="#ffff33", colour="black") +
+  ggplot2::ggtitle("Bottom 20 regions of Wolverhampton Employed persons who work part-time")+
+  ggplot2::xlab("Employed persons aged between 16 and 74")+
+  ggplot2::ylab("Output Area (OA)")+
+  ggplot2::theme_bw() 
+
+```
+
+# Exploratory statistics
+
+The graphics above provide preliminary evidence that the distribution of variables.
+
+The code below calculates the percentage of assigned variables over total population, households, total population aged 16 to 74, total person employed aged 16 to 74.
+
+## Calculate percentage for the each variables
+
+```{r percentage, warning = FALSE, message = FALSE}
+
+Percentage <- 
+  Wolverhampton_2011OAC %>%
+  dplyr::mutate(
+    Perc_k004 = (k004 / Total_Population) * 100,
+    Perc_k009 = (k009 / Total_Population_16_and_over) * 100,
+    Perc_k010 = (k010 / Total_Population_16_and_over) * 100,
+    Perc_k027 = (k027 / Total_Household_Spaces) * 100,
+    Perc_k031 = (k031 / Total_Households) * 100,
+    Perc_k041 = (k041 / Total_Households) * 100,
+    Perc_k046 = (k046 / Total_Employment_16_to_74) * 100
+  ) %>%
+  dplyr::select(OA, Perc_k004, Perc_k009, Perc_k010, 
+                Perc_k027, Perc_k031, Perc_k041, Perc_k046
+                )
+```
+
+## Descriptive statistics
+
+```{r Desc_Stat, warning = FALSE, message = FALSE}
+
+# Calculating descriptive statistics
+
+wolverhampton_stat_desc <- 
+  Percentage %>%
+  dplyr::select(Perc_k004, Perc_k009, Perc_k010, 
+                Perc_k027, Perc_k031, Perc_k041, Perc_k046) %>%
+  pastecs::stat.desc(norm =TRUE)
+
+wolverhampton_stat_desc %>%
+  knitr::kable(digits = 5)
+
+```
+
+### Shapiro test, Density histogram and QQ plot
+
+### k004 - Persons aged 45 to 64
+
+```{r k004_Desc,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro_Test
+
+Percentage %>%
+  dplyr::pull(Perc_k004) %>%
+  stats::shapiro.test()
+
+# Density_Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k004
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k004) %>% mean(),
+      sd = Percentage %>% pull(Perc_k004) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-Plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k004
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+## k009 - Persons aged over 16 who are single
+
+```{r k009_Desc,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro-Test
+
+Percentage %>%
+  dplyr::pull(Perc_k009) %>%
+  stats::shapiro.test()  
+
+# Density-Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k009
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k009) %>% mean(),
+      sd = Percentage %>% pull(Perc_k009) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k009
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+## k010 - Persons aged over 16 who are married or in a registered same-sex civil partnership
+
+```{r k010_Desc,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro-test
+
+Percentage %>%
+  dplyr::pull(Perc_k010) %>%
+  stats::shapiro.test() 
+
+# Density-Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k010
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k010) %>% mean(),
+      sd = Percentage %>% pull(Perc_k010) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k010
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+## k027 - Households who live in a detached house or bungalow
+
+```{r k027_Desc,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro-Test
+
+Percentage %>%
+  dplyr::pull(Perc_k027) %>%
+  stats::shapiro.test() 
+
+# Density-Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k027
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k027) %>% mean(),
+      sd = Percentage %>% pull(Perc_k027) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k027
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+## k031 - Households who own or have shared ownership of property
+
+```{r k031_Dsec,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro-Test
+
+Percentage %>%
+  dplyr::pull(Perc_k031) %>%
+  stats::shapiro.test() 
+
+# Density-Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k031
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k031) %>% mean(),
+      sd = Percentage %>% pull(Perc_k031) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k031
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+## k041 - Households with two or more cars or vans 
+
+```{r k041_Desc,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro-Test
+
+Percentage %>%
+  dplyr::pull(Perc_k041) %>%
+  stats::shapiro.test() 
+
+# Density-Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k041
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k041) %>% mean(),
+      sd = Percentage %>% pull(Perc_k041) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k041
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+## k046 - Employed persons aged between 16 and 74 who work part-time
+
+```{r K046_Desc,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Shapiro-Test
+
+Percentage %>%
+  dplyr::pull(Perc_k046) %>%
+  stats::shapiro.test() 
+
+# Density-Histogram
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      x = Perc_k046
+    )
+  ) +
+  ggplot2::geom_histogram(
+    aes(
+      y =..density..
+    ),
+    binwidth = 5,
+    fill = "black",
+    colour = "grey"
+  ) + 
+  ggplot2::stat_function(
+    fun = dnorm, 
+    args = list(
+      mean = Percentage %>% pull(Perc_k046) %>% mean(),
+      sd = Percentage %>% pull(Perc_k046) %>% sd()
+    ),
+    colour = "red", size = 1
+  )
+
+# QQ-plot
+
+Percentage %>%
+  ggplot2::ggplot(
+    aes(
+      sample = Perc_k046
+    )
+  ) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(col = "darkblue")
+
+```
+
+# Results and Discussion
+
+  Initial analysis of the variables with simple histogram, scatterplot, highest and lowest also summarized each 
+variable to explore the distribution of the variables with GGplot2.Which shows some variables are equally distributed among the other Kvariables from the 2011- Output Area Classification. Exploratory Data Analysis (EDA) s essentially a creative operation. And like most innovative processes, the trick to asking quality questions is to produce a large quantity of questions. It’s used to investigate the distribution of the data, relationships and patterns and to conduct the hypothesis tests and statistical calculation with various statistical tools methods via summary statistics and graphical representation, EDA helps to understand the data first.
+
+An EDA of the variables allocated from LAD data and compared with the 2011OAC data is analyzed in this project paper. 
+The variables include a plethora of statistical units, such as population age, marital and civil partnership status, ownership of housing, availability of vehicles in regions of Wolverhampton, and part-time work hours. The data visualized by Histograms shows the distribution of data being normal or skewed. It seems the data are distributed normally for all the variables some had outliers which has been skimmed from the table. Then, to determine the relationship between variables we have plotted scatterplot with the same unit statistical measure which distributed normally. 
+Finally, Top and bottom 20 variables for the variable have been generated by the OA. It helps to understand the regions with higher and lower variables. EDA was carried out where the percentage of the variable was measured over the totals per OA. It helps to normalize the data better than numerical values. Therefore, measurement of descriptive statistics was performed for these results.
+
+Descriptive statistics help to explore the form or distribution of the data used for modeling or analysis. There are different measures that help to understand the curves' meaning. To check the normality of the data Shapiro-Wilk test which provides the significance data. A normtest.p is a measure whose importance for the Shapiro test is indicated by its value. To visually validate the fact that the variable is typically distributed or not, a density-based histogram including the form of the normal distribution with the same mean and standard deviation is also plotted for the visualization and the QQ plot. The positive kurtosis indicates the distribution of the heavily-tailed and the negative value indicates the flat distribution. Where the distribution of Perc_k004, Perc_k009, Perc_k027 and Perc_k046 is heavily tailed, the distribution of Perc_k010, Perc_k031 and Per_k041 is smooth. The mean value, minimum and maximum, is the measure of the value of the variable that differs with and from the mean value of the variable in OA. The vector Perc k004, Perc_k009, Perc_k010, Perc_k031, Perc_k046 is typically distributed where there is large distribution of Perc_k027, Per_k041. Positive skew values reflect the skew to the left and the negative value reveals the skew to the right.
+Thus, ends the discussion on the variables, we will create the Household modelling further.
+
+# Option A.2
+
+## Multiple Linear regression
+
+###Select and normalize variables
+
+```{r Load_libraries,warning = FALSE, message = FALSE }
+
+library(stargazer)
+library(lmtest)
+library(car)
+library(lm.beta)
+
+```
+
+```{r dependent_var, warning = FALSE, message = FALSE}
+
+# Selecting the dependent and independent variables
+
+Wolverhampton_Household <-
+  Wolverhampton_2011OAC %>%
+  dplyr::select(
+    OA, Total_Population, Total_Population_16_and_over, Total_Household_Spaces,
+    Total_Households, Total_Employment_16_to_74,
+    k004, k009, k010, k027, k031, k041, k046 
+  ) %>%
+  
+# percentage of dependent and independent variables
+  
+dplyr::mutate (
+  k004 = ( k004 / Total_Population) * 100,
+  k009 = ( k009 / Total_Population_16_and_over) * 100,
+  k010 = ( k010 / Total_Population_16_and_over) * 100,
+  k027 = ( k027 / Total_Household_Spaces) * 100,
+  k031 = ( k031 / Total_Households) * 100,
+  k041 = ( k041 / Total_Households) * 100,
+  k046 = ( k046 / Total_Employment_16_to_74) * 100
+  ) %>%
+  
+#  rename columns
+  
+  dplyr::rename_with(
+    function(x) {(paste0("Perc_", x))},
+    c(k004, k009, k010, k027, k031, k041, k046)
+  )
+
+```
+
+```{r Model, warning = FALSE, message = FALSE}
+
+# Selected variables
+
+#Perc_k004 : Persons aged 45 to 64
+#Perc_k009 : Persons aged over 16 who are single
+#Perc_k010 : Persons aged over 16 who are married or in a registered same-sex civil partnership
+#Perc_k027 : Households who live in a detached house or bungalow
+#Perc_k041 : Households with two or more cars or vans
+#Perc_k046 : Employed persons aged between 16 and 74 who work part-time
+
+# create household model
+
+Household_model <-
+  Wolverhampton_Household %$%
+  lm(
+    Perc_k031 ~ 
+      Perc_k004 + Perc_k009 + Perc_k010 + Perc_k027 + Perc_k041 + Perc_k046
+    )
+
+```
+
+```{r Hosuehold_summary, warning = FALSE, message = FALSE}
+
+#print summary
+Household_model %>%
+  summary()
+
+```
+
+```{r stargazer, warning = FALSE, message = FALSE}
+
+# Not rendered in bookdown
+stargazer(Household_model, header=FALSE)
+
+```
+
+```{r shapiro, warning = FALSE, message = FALSE}
+
+# Conduct shapiro-test for Households.
+# Normality
+
+Household_model %>%
+  rstandard() %>%
+  shapiro.test()
+
+```
+
+```{r Bp-test, warning = FALSE, message = FALSE}
+
+# Homoscedasticity
+# Breusch-Pagan test
+
+Household_model %>% 
+  bptest()
+
+```
+
+```{r dwtest,warning = FALSE, message = FALSE}
+
+# Independence
+# Durbin-Watson test
+
+Household_model %>%
+  dwtest()
+
+```
+
+```{r vif,warning = FALSE, message = FALSE}
+
+# Conduct vif model
+
+Household_model %>%
+  vif()
+
+```
+
+```{r lm test,warning = FALSE, message = FALSE}
+
+# Conduct lm.beta
+
+lm.beta(Household_model)
+
+```
+
+
+
+```{r plots,echo=TRUE, message=FALSE, warning=FALSE, fig.height = 4}
+
+# Plotting residual to better understanding the variables
+# Explore the residuals visually
+
+# cook's distance c = 1
+
+Household_model %>%
+  plot(which = c(1))
+
+# cook's distance c = 2
+
+Household_model %>%
+  plot(which = c(2))
+
+# cook's distance c = 3
+
+Household_model %>%
+  plot(which = c(3))
+
+# cook's distance c = 5
+
+Household_model %>%
+  plot(which = c(5))
+
+```
